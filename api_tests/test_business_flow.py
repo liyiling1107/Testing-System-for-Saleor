@@ -1,7 +1,7 @@
 import pytest
 import time
 import logging
-from ui_tests.pages.home_page import HomePage
+from pages.home_page import HomePage
 from core_engine.utils import load_test_data
 
 def test_api_modify_and_ui_verify(api_client, driver):

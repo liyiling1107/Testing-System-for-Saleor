@@ -8,8 +8,9 @@ environment:
 products:
   # 用于 test_full_flow.py 的同步测试数据
   sync_flow:
+    product_id: "UHJvZHVjdDoxMjc="  # 直接使用 ID
     default_name: "White Plimsolls"
-    target_name: "Shoes"
+    target_name: "White Plimsolls Modified"
     check_interval: 2
     max_wait: 310  # 略大于 Saleor 的 300s 缓存时间
 

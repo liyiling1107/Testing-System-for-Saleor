@@ -1,4 +1,4 @@
-from ui_tests.pages.home_page import HomePage
+from pages.home_page import HomePage 
 
 def test_home_page_load(driver):
     home_page = HomePage(driver)

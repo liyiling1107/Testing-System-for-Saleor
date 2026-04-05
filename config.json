@@ -1,5 +1,11 @@
 {
-  "baseUrl": "https://demo.saleor.io",
+  "baseUrl": "http://localhost:8000",
   "browser": "chromium",
-  "email": "198689336@qq.com"
+  "email": "198689336@qq.com",
+  "admin_user": {
+    "email": "admin@example.com",
+    "password": "admin123"
+  },
+  "frontend_url": "http://localhost:3000",
+  "dashboard_url": "http://localhost:9000"
 }

@@ -1,17 +1,30 @@
-# 商品同步测试数据
 product_updates:
-  - id: "UHJvZHVjdDoxNTE="  # White Plimsolls 的 Base64 ID
-    original_name: "White Plimsolls"
-    new_name: "Gemini Special Edition"
-    channel: "default-channel"
-
-# 以后可以继续添加更多商品进行批量测试
-  - id: "UHJvZHVjdDoxNTc=" 
-    original_name: "Black Boots"
-    new_name: "Modern Black Boots"
-    channel: "default-channel"
-
-# 订单测试数据
+- id: UHJvZHVjdDoxNTI=
+  original_name: Apple Juice
+  new_name: Apple Juice (Modified)
+  channel: default-channel
+- id: UHJvZHVjdDoxMzQ=
+  original_name: Monospace Tee
+  new_name: Monospace Tee (Modified)
+  channel: default-channel
+- id: UHJvZHVjdDoxMzA=
+  original_name: Paul's Balance 420
+  new_name: Paul's Balance 420 (Modified)
+  channel: default-channel
+- id: UHJvZHVjdDoxNTQ=
+  original_name: Banana Juice
+  new_name: Banana Juice (Modified)
+  channel: default-channel
+- id: UHJvZHVjdDoxMjc=
+  original_name: White Plimsolls
+  new_name: White Plimsolls Modified
+  channel: default-channel
 order_flow:
-  variant_id: "UHJvZHVjdFZhcmlhbnQ6MzE3" # 某个规格的ID
-  customer_email: "test@example.com"
+  variant_id: UHJvZHVjdFZhcmlhbnQ6MzE3
+  customer_email: test@example.com
+products:
+  sync_flow:
+    default_name: White Plimsolls
+    target_name: White Plimsolls Modified
+    check_interval: 2
+    max_wait: 60

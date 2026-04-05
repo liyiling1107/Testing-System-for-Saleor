@@ -1,0 +1,17 @@
+# 商品同步测试数据
+product_updates:
+  - id: "UHJvZHVjdDoxNTE="  # White Plimsolls 的 Base64 ID
+    original_name: "White Plimsolls"
+    new_name: "Gemini Special Edition"
+    channel: "default-channel"
+
+# 以后可以继续添加更多商品进行批量测试
+  - id: "UHJvZHVjdDoxNTc=" 
+    original_name: "Black Boots"
+    new_name: "Modern Black Boots"
+    channel: "default-channel"
+
+# 订单测试数据
+order_flow:
+  variant_id: "UHJvZHVjdFZhcmlhbnQ6MzE3" # 某个规格的ID
+  customer_email: "test@example.com"
