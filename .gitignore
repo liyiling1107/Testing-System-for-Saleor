@@ -1,0 +1,17 @@
+# 忽略 Python 虚拟环境
+venv/
+.venv/
+env/
+
+# 忽略编译缓存
+__pycache__/
+*.pyc
+
+# 忽略测试报告和日志
+allure-results/
+allure-report/
+*.log
+
+# 忽略 IDE 配置
+.idea/
+.vscode/

@@ -1,0 +1,42 @@
+# 全局环境配置
+environment:
+  base_url: "http://localhost:3000/"
+  api_url: "http://localhost:8000/graphql/"
+  timeout: 10
+
+# 核心业务测试数据
+products:
+  # 用于 test_full_flow.py 的同步测试数据
+  sync_flow:
+    default_name: "White Plimsolls"
+    target_name: "Shoes"
+    check_interval: 2
+    max_wait: 310  # 略大于 Saleor 的 300s 缓存时间
+
+  # 用于 test_storefront.py 的搜索或展示验证
+  display_check:
+    - id: "UHJvZHVjdDoxMTU=" # 示例 GraphQL ID
+      expected_name: "White Plimsolls"
+    - id: "UHJvZHVjdDoxMTY="
+      expected_name: "Blue Hoodie"
+
+# 订单与支付测试数据 (用于未来的 test_orders.py 扩展)
+orders:
+  test_user:
+    email: "admin@example.com"
+    password: "admin"
+  checkout_data:
+    variant_id: "UHJvZHVjdFZhcmlhbnQ6MjAy"
+    quantity: 1
+    shipping_address:
+      first_name: "John"
+      last_name: "Doe"
+      street_address_1: "123 Main St"
+      city: "New York"
+      postal_code: "10001"
+      country: "US"
+
+# 错误处理测试（负向测试）
+negative_cases:
+  invalid_product_id: "invalid-id-123"
+  non_existent_user: "fake_user@none.com"

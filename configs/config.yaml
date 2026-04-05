@@ -1,0 +1,6 @@
+frontend_url: "http://localhost:3000/"
+base_url: "http://localhost:8000/graphql/"
+admin_user:
+  email: "admin@example.com"
+  password: "admin123"
+default_channel: "default-channel"
