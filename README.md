@@ -8,10 +8,10 @@
 
 | 模块名称 | 访问地址 | 界面预览 |
 | :--- | :--- | :--- |
-| **管理员后台** | [http://localhost:9000/dashboard/](http://localhost:9000/dashboard/) | ![图片1](images\1.png) |
-| **GraphQL 交互界面** | [http://localhost:8000/graphql/](http://localhost:8000/graphql/) | ![图片2](images\2.png) |
-| **邮件测试工具** | [http://localhost:8025/](http://localhost:8025/) | ![图片3](images\3.png) |
-| **客户购物前端** | [http://localhost:3000/default-channel](http://localhost:3000/default-channel) | ![图片4](images\4.png) |
+| **管理员后台** | [http://localhost:9000/dashboard/](http://localhost:9000/dashboard/) | ![图片1](images/1.png) |
+| **GraphQL 交互界面** | [http://localhost:8000/graphql/](http://localhost:8000/graphql/) | ![图片2](images/2.png) |
+| **邮件测试工具** | [http://localhost:8025/](http://localhost:8025/) | ![图片3](images/3.png) |
+| **客户购物前端** | [http://localhost:3000/default-channel](http://localhost:3000/default-channel) | ![图片4](images/4.png) |
 
 ---
 
@@ -65,28 +65,28 @@
 
 | 步骤 | 操作指引图示 |
 | :---: | :--- |
-| **01** | ![图片5](images\5.png) |
-| **02** | ![图片6](images\6.png) |
-| **03** | ![图片7](images\7.png) |
-| **04** | ![图片8](images\8.png) |
-| **05** | ![图片9](images\9.png) |
-| **06** | ![图片10](images\10.png) |
-| **07** | ![图片11](images\11.png) |
-| **08** | ![图片12](images\12.png) |
-| **09** | ![图片13](images\13.png) |
-| **10** | ![图片14](images\14.png) |
-| **11** | ![图片15](images\15.png) |
-| **12** | ![图片16](images\16.png) |
-| **13** | ![图片17](images\17.png) |
-| **14** | ![图片18](images\18.png) |
-| **15** | ![图片19](images\19.png) |
-| **16** | ![图片20](images\20.png) |
-| **17** | ![图片21](images\21.png) |
-| **18** | ![图片22](images\22.png) |
-| **19** | ![图片23](images\23.png) |
-| **20** | ![图片24](images\24.png) |
-| **21** | ![图片25](images\25.png) |
-| **22** | ![图片26](images\26.png) |
-| **23** | ![图片27](images\27.png) |
+| **01** | ![图片5](images/5.png) |
+| **02** | ![图片6](images/6.png) |
+| **03** | ![图片7](images/7.png) |
+| **04** | ![图片8](images/8.png) |
+| **05** | ![图片9](images/9.png) |
+| **06** | ![图片10](images/10.png) |
+| **07** | ![图片11](images/11.png) |
+| **08** | ![图片12](images/12.png) |
+| **09** | ![图片13](images/13.png) |
+| **10** | ![图片14](images/14.png) |
+| **11** | ![图片15](images/15.png) |
+| **12** | ![图片16](images/16.png) |
+| **13** | ![图片17](images/17.png) |
+| **14** | ![图片18](images/18.png) |
+| **15** | ![图片19](images/19.png) |
+| **16** | ![图片20](images/20.png) |
+| **17** | ![图片21](images/21.png) |
+| **18** | ![图片22](images/22.png) |
+| **19** | ![图片23](images/23.png) |
+| **20** | ![图片24](images/24.png) |
+| **21** | ![图片25](images/25.png) |
+| **22** | ![图片26](images/26.png) |
+| **23** | ![图片27](images/27.png) |
 
 ---
