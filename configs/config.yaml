@@ -1,4 +1,5 @@
 frontend_url: "http://localhost:3000/"
+dashboard_url: "http://localhost:9000/"
 base_url: "http://localhost:8000/graphql/"
 admin_user:
   email: "admin@example.com"

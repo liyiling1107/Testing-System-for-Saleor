@@ -34,6 +34,9 @@ SCRIPTS = {
     # 功能测试
     "storefront": "function_tests/test_storefront.py",
     "mail_test": "function_tests/test_fail_demo.py",
+    "func_login": "function_tests/test_login_functionality.py", 
+    "func_cart": "function_tests/test_cart_functionality.py", 
+    "func_checkout": "function_tests/test_checkout_flow.py",   
     
     # API测试
     "orders": "api_tests/test_orders.py",

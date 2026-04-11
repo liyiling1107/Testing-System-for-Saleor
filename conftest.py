@@ -158,6 +158,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "performance: 性能测试标记")
     config.addinivalue_line("markers", "slow: 慢速测试标记")
     config.addinivalue_line("markers", "security: 安全测试标记")
+    config.addinivalue_line("markers", "function: 功能测试标记")
 
 def pytest_html_results_table_header(cells):
     """修改报告表格头，添加描述列"""
