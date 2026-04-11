@@ -154,6 +154,10 @@ def pytest_configure(config):
         if not hasattr(config.option, 'timeout'):
             config.option.timeout = 60  # 全局超时60秒
 
+    # ========== 新增：注册自定义标记 ==========
+    config.addinivalue_line("markers", "performance: 性能测试标记")
+    config.addinivalue_line("markers", "slow: 慢速测试标记")
+
 def pytest_html_results_table_header(cells):
     """修改报告表格头，添加描述列"""
     cells.insert(2, "<th>Description</th>")

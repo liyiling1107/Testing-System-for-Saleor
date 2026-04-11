@@ -504,8 +504,9 @@
                 { id: 'full', name: 'Full Regression', desc: '全量回归测试套件', alert: false, icon: 'fa-tasks', disabled: false }
             ],
             performance: [
-                { id: 'load_test', name: '负载压测 (规划中)', desc: '高并发场景', alert: false, icon: 'fa-chart-simple', disabled: true },
-                { id: 'stability', name: '稳定性测试 (规划中)', desc: '长时间运行', alert: false, icon: 'fa-hourglass-half', disabled: true }
+                { id: 'perf_api_response', name: 'API Response Time', desc: 'API 响应时间基准测试', alert: false, icon: 'fa-stopwatch', disabled: false },
+                { id: 'perf_concurrent', name: 'Concurrent Requests', desc: '并发请求压力测试', alert: false, icon: 'fa-users', disabled: false },
+                { id: 'perf_page_load', name: 'Page Load Performance', desc: '页面加载性能分析', alert: false, icon: 'fa-tachometer-alt', disabled: false }
             ],
             ui: [
                 { id: 'ui_product_browsing', name: 'Product Browsing UI', desc: '商品列表渲染与详情跳转验证', alert: false, icon: 'fa-eye', disabled: false },

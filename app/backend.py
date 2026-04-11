@@ -44,6 +44,11 @@ SCRIPTS = {
     "ui_product_browsing": "ui_tests/test_product_browsing.py",
     "ui_search": "ui_tests/test_search_functionality.py",
     "ui_navigation": "ui_tests/test_navigation_flow.py",
+
+     # 性能测试
+    "perf_api_response": "performance_tests/test_api_response_time.py",
+    "perf_concurrent": "performance_tests/test_concurrent_requests.py",
+    "perf_page_load": "performance_tests/test_page_load_performance.py",
 }
 
 def send_qq_email(script_id, error_output, report_url):
