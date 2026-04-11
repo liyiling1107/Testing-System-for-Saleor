@@ -250,6 +250,20 @@
             font-size: 0.7rem;
             letter-spacing: 0.1em;
         }
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .progress-fill.success { background: #10b981; }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.danger { background: #ef4444; }
     </style>
 </head>
 <body>
@@ -291,21 +305,39 @@
         <!-- 控制中心 (完全不变) -->
         <div id="tab-analysis" class="tab-content active">
             <h1 class="text-3xl font-black text-slate-800 mb-8">监控数据大屏</h1>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-3xl border border-slate-100">
                     <div class="text-slate-400 text-xs font-black uppercase">总运行次数</div>
                     <div id="stat-total" class="text-4xl font-black text-slate-800 mt-2">0</div>
+                    <div id="stat-total-trend" class="text-xs text-slate-400 mt-1">--</div>
                 </div>
                 <div class="bg-white p-6 rounded-3xl border-b-4 border-emerald-500">
                     <div class="text-emerald-500 text-xs font-black uppercase">成功总数</div>
                     <div id="stat-success" class="text-4xl font-black text-emerald-600 mt-2">0</div>
+                    <div id="stat-success-trend" class="text-xs text-slate-400 mt-1">--</div>
                 </div>
                 <div class="bg-white p-6 rounded-3xl border-b-4 border-rose-500">
                     <div class="text-rose-500 text-xs font-black uppercase">失败总数</div>
                     <div id="stat-failed" class="text-4xl font-black text-rose-600 mt-2">0</div>
+                    <div id="stat-failed-trend" class="text-xs text-slate-400 mt-1">--</div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border-b-4 border-blue-500">
+                    <div class="text-blue-500 text-xs font-black uppercase">通过率</div>
+                    <div id="stat-passrate" class="text-4xl font-black text-blue-600 mt-2">0%</div>
+                    <div id="stat-passrate-trend" class="text-xs text-slate-400 mt-1">--</div>
                 </div>
             </div>
-            
+
+            <div class="bg-white rounded-3xl border p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">📊 测试套件健康度</h3>
+                    <span class="text-xs text-blue-500 cursor-pointer hover:underline" onclick="switchTab('history')">查看详情 →</span>
+                </div>
+                <div id="suite-health" class="space-y-3 max-h-64 overflow-y-auto pr-2" style="scrollbar-width: thin;">
+                    <div class="text-center text-slate-400 py-4">加载中...</div>
+                </div>
+            </div>
+
             <div class="flex flex-col xl:flex-row gap-8">
                 <div class="chart-box flex-1 flex flex-col items-center">
                     <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6">总体通过率</h3>
@@ -635,16 +667,33 @@
             try {
                 const res = await fetch('http://127.0.0.1:8000/api/statistics');
                 const data = await res.json();
-                document.getElementById('stat-total').innerText = data.total || 0;
-                document.getElementById('stat-success').innerText = data.success || 0;
-                document.getElementById('stat-failed').innerText = data.failed || 0;
+                
+                // 基础统计数据
+                const total = data.total || 0;
+                const success = data.success || 0;
+                const failed = data.failed || 0;
+                const passRate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
+                
+                document.getElementById('stat-total').innerText = total;
+                document.getElementById('stat-success').innerText = success;
+                document.getElementById('stat-failed').innerText = failed;
+                document.getElementById('stat-passrate').innerText = passRate + '%';
+                
+                // 趋势占位（后续可接入真实趋势数据）
+                document.getElementById('stat-total-trend').innerText = '--';
+                document.getElementById('stat-success-trend').innerText = '--';
+                document.getElementById('stat-failed-trend').innerText = '--';
+                document.getElementById('stat-passrate-trend').innerText = '--';
+                
+                // 渲染套件健康度
+                renderSuiteHealth(data.breakdown || {});
                 
                 if(charts.pie) charts.pie.destroy();
                 if(charts.bar) charts.bar.destroy();
 
                 charts.pie = new Chart(document.getElementById('pieChart'), {
                     type: 'doughnut',
-                    data: { labels: ['成功', '失败'], datasets: [{ data: [data.success || 0, data.failed || 0], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 4, borderColor: '#fff' }] },
+                    data: { labels: ['成功', '失败'], datasets: [{ data: [success, failed], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 4, borderColor: '#fff' }] },
                     options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
                 });
 
@@ -668,6 +717,63 @@
             } catch(e) {
                 console.warn("统计数据加载失败，后端未启动或接口异常", e);
             }
+        }
+
+                // 渲染测试套件健康度
+        function renderSuiteHealth(breakdown) {
+            const container = document.getElementById('suite-health');
+            const suites = Object.entries(breakdown);
+            
+            if (suites.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-4">暂无数据，请先执行测试</div>';
+                return;
+            }
+            
+            // 套件名称映射
+            const nameMap = {
+                'storefront': 'UI Storefront',
+                'mail_test': 'Alarm Test',
+                'orders': 'Order API',
+                'business': 'Business API',
+                'full': 'Full Flow',
+                'ui_product_browsing': 'Product UI',
+                'ui_search': 'Search UI',
+                'ui_navigation': 'Nav UI',
+                'perf_api_response': 'API Perf',
+                'perf_concurrent': 'Concurrent',
+                'perf_page_load': 'Page Load',
+                'sec_auth': 'Auth Security',
+                'sec_api': 'API Security',
+                'func_login': 'Login',
+                'func_cart': 'Cart',
+                'func_checkout': 'Checkout'
+            };
+            
+            // 按通过率排序（低的排前面，方便关注）
+            const sorted = suites.sort((a, b) => {
+                const rateA = a[1].success + a[1].failed > 0 ? a[1].success / (a[1].success + a[1].failed) : 0;
+                const rateB = b[1].success + b[1].failed > 0 ? b[1].success / (b[1].success + b[1].failed) : 0;
+                return rateA - rateB;
+            });
+            
+            container.innerHTML = sorted.map(([key, stats]) => {
+                const total = stats.success + stats.failed;
+                const rate = total > 0 ? (stats.success / total * 100) : 0;
+                const status = rate >= 80 ? '✅' : (rate >= 50 ? '⚠️' : '❌');
+                const color = rate >= 80 ? 'success' : (rate >= 50 ? 'warning' : 'danger');
+                const name = nameMap[key] || key;
+                
+                return `
+                    <div class="flex items-center gap-4">
+                        <span class="w-36 text-sm font-medium text-slate-600 truncate">${status} ${name}</span>
+                        <div class="flex-1 progress-bar">
+                            <div class="progress-fill ${color}" style="width: ${rate}%"></div>
+                        </div>
+                        <span class="w-12 text-sm font-bold text-slate-600">${rate.toFixed(0)}%</span>
+                        <span class="w-14 text-xs text-slate-400">${stats.success}/${total}</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function loadHistory() {
