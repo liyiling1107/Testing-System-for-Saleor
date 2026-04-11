@@ -49,6 +49,10 @@ SCRIPTS = {
     "perf_api_response": "performance_tests/test_api_response_time.py",
     "perf_concurrent": "performance_tests/test_concurrent_requests.py",
     "perf_page_load": "performance_tests/test_page_load_performance.py",
+
+    # 安全测试
+    "sec_auth": "security_tests/test_authentication_security.py",
+    "sec_api": "security_tests/test_api_security.py",
 }
 
 def send_qq_email(script_id, error_output, report_url):

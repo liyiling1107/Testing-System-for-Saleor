@@ -335,7 +335,7 @@
                         <div class="type-btn" data-type="api">⚙️ API Test</div>
                         <div class="type-btn" data-type="performance">⚡ Performance Tests</div>
                         <div class="type-btn" data-type="ui">🎨 UI Test</div>
-                        <div class="type-btn" data-type="more">🔧 扩展测试</div>
+                        <div class="type-btn" data-type="security">🛡️ Security Test</div>
                     </div>
                 </div>
 
@@ -513,9 +513,9 @@
                 { id: 'ui_search', name: 'Search Functionality UI', desc: '搜索框交互与结果展示验证', alert: false, icon: 'fa-search', disabled: false },
                 { id: 'ui_navigation', name: 'Navigation Flow UI', desc: '页面跳转与浏览器导航验证', alert: false, icon: 'fa-compass', disabled: false }
             ],
-            more: [
-                { id: 'security_scan', name: '安全基线扫描 (预览)', desc: 'OWASP 基础检测', alert: false, icon: 'fa-shield-alt', disabled: true },
-                { id: 'contract_test', name: '合约测试扩展', desc: 'Pact 验证', alert: false, icon: 'fa-file-signature', disabled: true }
+            security: [
+                { id: 'sec_auth', name: 'Authentication Security', desc: '认证机制安全测试', alert: false, icon: 'fa-shield-alt', disabled: false },
+                { id: 'sec_api', name: 'API Security', desc: 'API 安全配置检测', alert: false, icon: 'fa-lock', disabled: false }
             ]
         };
 
@@ -570,7 +570,9 @@
                 'full': 'Full Regression',
                 'ui_product_browsing': 'Product Browsing UI',
                 'ui_search': 'Search Functionality UI',
-                'ui_navigation': 'Navigation Flow UI'
+                'ui_navigation': 'Navigation Flow UI',
+                'sec_auth': 'Authentication Security',
+                'sec_api': 'API Security'
             };
     
             const disabledIds = ['load_test', 'stability', 'user_journey', 'promo_engine', 'security_scan', 'contract_test'];
