@@ -208,11 +208,11 @@ class SaleorAPI:
                     if node["name"].lower() == name.lower():
                         return node["id"]
         
-            self.logger.warning(f"错误：找不到商品 '{name}'")
+            logger.warning(f"错误：找不到商品 '{name}'")
             return None
         
         except Exception as e:
-            self.logger.error(f"获取商品 ID 失败: {e}")
+            logger.error(f"获取商品 ID 失败: {e}")
             return None
     
     def get_product_name_by_id(self, product_id: str) -> Optional[str]:

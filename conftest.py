@@ -61,6 +61,7 @@ def driver():
     options.add_argument('--disable-extensions')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless')  # 关键：无头模式
     
     # 如果后端调用时想无头运行（不弹出浏览器窗口），取消下面一行的注释
     # options.add_argument('--headless')
@@ -69,7 +70,7 @@ def driver():
     options.add_argument('--disable-gpu')
     
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), 
+        service=Service(r"C:\Users\19868\Desktop\毕业设计\SaleorQA_System\chromedriver.exe"),
         options=options
     )
     
