@@ -32,7 +32,6 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 # --- 脚本映射表 ---
 SCRIPTS = {
     # 功能测试
-    "storefront": "function_tests/test_storefront.py",
     "mail_test": "function_tests/test_fail_demo.py",
     "func_login": "function_tests/test_login_functionality.py", 
     "func_cart": "function_tests/test_cart_functionality.py", 

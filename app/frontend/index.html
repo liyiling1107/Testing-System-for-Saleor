@@ -358,9 +358,9 @@
                             <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded-full">滚动查看</span>
                         </div>
                         <div id="output" class="flex-1" style="min-height: 0;">
-                            ✨ 就绪。请从左侧分类中选择测试用例执行。<br>
-                            📌 UI测试 / API测试 均已分类展示，性能/功能测试即将解锁。<br>
-                            📢 滚动区域已优化，测试套件区域可上下滑动。
+                            ✨ 就绪。请从左侧分类中选择测试用例执行<br>
+                            📌 功能测试 / API测试 / 性能测试 / UI测试 / 安全测试<br>
+                            📢 滚动区域已优化，测试套件区域可上下滑动
                         </div>
                     </div>
                 </div>
@@ -495,7 +495,6 @@
         // ================== 测试用例数据 (保留所有原有测试 + 扩展) ==================
         const testSuites = {
             function: [
-                { id: 'storefront', name: 'UI Storefront', desc: '用户界面交互测试', alert: false, icon: 'fa-store', disabled: false },
                 { id: 'func_login', name: 'Login Functionality', desc: '登录功能验证测试', alert: false, icon: 'fa-sign-in-alt', disabled: false },
                 { id: 'func_cart', name: 'Cart Functionality', desc: '购物车功能测试', alert: false, icon: 'fa-shopping-cart', disabled: false },
                 { id: 'func_checkout', name: 'Checkout Flow', desc: '结账流程验证', alert: false, icon: 'fa-credit-card', disabled: false },
