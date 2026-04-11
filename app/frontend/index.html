@@ -29,6 +29,14 @@
             border: 1px solid #1e293b; 
             overflow-y: auto;
         }
+
+        #output a {
+            color: #38bdf8;
+            text-decoration: underline;
+        }
+        #output a:hover {
+            color: #60a5fa;
+        }
         
         .chart-box { background: white; padding: 2rem; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
@@ -500,8 +508,9 @@
                 { id: 'stability', name: '稳定性测试 (规划中)', desc: '长时间运行', alert: false, icon: 'fa-hourglass-half', disabled: true }
             ],
             ui: [
-                { id: 'user_journey', name: '用户旅程 (待接入)', desc: '端到端场景', alert: false, icon: 'fa-user-check', disabled: true },
-                { id: 'promo_engine', name: '促销引擎验证 (待接入)', desc: '优惠券/折扣', alert: false, icon: 'fa-coupon', disabled: true }
+                { id: 'ui_product_browsing', name: 'Product Browsing UI', desc: '商品列表渲染与详情跳转验证', alert: false, icon: 'fa-eye', disabled: false },
+                { id: 'ui_search', name: 'Search Functionality UI', desc: '搜索框交互与结果展示验证', alert: false, icon: 'fa-search', disabled: false },
+                { id: 'ui_navigation', name: 'Navigation Flow UI', desc: '页面跳转与浏览器导航验证', alert: false, icon: 'fa-compass', disabled: false }
             ],
             more: [
                 { id: 'security_scan', name: '安全基线扫描 (预览)', desc: 'OWASP 基础检测', alert: false, icon: 'fa-shield-alt', disabled: true },
@@ -551,47 +560,69 @@
         async function runTest(sid) {
             const out = document.getElementById('output');
             const loader = document.getElementById('loader');
-            // 友好名称映射
+    
             const testNames = {
-                'storefront': 'UI Storefront',
-                'mail_test': '告警验证 (必失败)',
-                'orders': 'Order Flow API',
+                'storefront': 'UI Storefront', 
+                'mail_test': 'Alarm Verification',
+                'orders': 'Order Flow API', 
                 'business': 'Business Flow',
                 'full': 'Full Regression',
-                'load_test': '负载压测 (规划中)',
-                'stability': '稳定性测试 (规划中)',
-                'user_journey': '用户旅程 (待接入)',
-                'promo_engine': '促销引擎验证 (待接入)',
-                'security_scan': '安全基线扫描',
-                'contract_test': '合约测试扩展'
+                'ui_product_browsing': 'Product Browsing UI',
+                'ui_search': 'Search Functionality UI',
+                'ui_navigation': 'Navigation Flow UI'
             };
-            const displayName = testNames[sid] || sid;
-            
-            // 检查是否为禁用测试 (规划中/待接入)
+    
             const disabledIds = ['load_test', 'stability', 'user_journey', 'promo_engine', 'security_scan', 'contract_test'];
             if (disabledIds.includes(sid)) {
-                out.innerText = `> [${new Date().toLocaleTimeString()}] ⚠️ 测试 [${displayName}] 暂未接入后端引擎，敬请期待后续版本。\n`;
-                out.scrollTop = out.scrollHeight;
+                out.innerHTML = `> ⚠️ 测试 [${testNames[sid] || sid}] 暂未接入<br>`;
                 return;
             }
-            
-            out.innerText = `> [${new Date().toLocaleTimeString()}] 🚀 启动测试: ${displayName}\n> 正在调用后端接口 http://127.0.0.1:8000/api/run/${sid} ...\n`;
+    
+            // 清空并显示启动信息
+            out.innerHTML = `> 🚀 启动测试: ${testNames[sid] || sid}<br>> 📡 连接执行引擎...<br>`;
             loader.classList.remove('hidden');
-            try {
-                const res = await fetch(`http://127.0.0.1:8000/api/run/${sid}`);
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status} - 后端响应异常`);
-                }
-                const data = await res.json();
-                out.innerText += data.output || `✅ 测试执行完成，无详细输出。`;
-                out.scrollTop = out.scrollHeight;
-                if (document.getElementById('tab-analysis').classList.contains('active')) loadAnalysis();
-                if (document.getElementById('tab-history').classList.contains('active')) loadHistory();
-            } catch(e) { 
-                out.innerText += `\n❌ [致命错误] 连接后端失败！请确保 FastAPI 服务运行在 127.0.0.1:8000\n详细: ${e.message}`;
-                out.scrollTop = out.scrollHeight;
+    
+            // 关闭已有连接
+            if (window.currentSSE) {
+                window.currentSSE.close();
             }
-            loader.classList.add('hidden');
+    
+            const es = new EventSource(`http://127.0.0.1:8000/api/run_stream/${sid}`);
+            window.currentSSE = es;
+    
+            es.onopen = () => {
+                out.innerHTML += `> ✅ 连接成功，等待执行...<br>`;
+                out.scrollTop = out.scrollHeight;
+            };
+    
+            es.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.line) {
+                        // 使用 insertAdjacentHTML 追加，性能更好
+                        const line = data.line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        out.insertAdjacentHTML('beforeend', `${line}<br>`);
+                        out.scrollTop = out.scrollHeight;
+                    } else if (data.done) {
+                        out.insertAdjacentHTML('beforeend', `<br>> ✅ 执行完成！状态: ${data.status.toUpperCase()}<br>`);
+                        out.insertAdjacentHTML('beforeend', `> 📊 <a href="${data.report_url}" target="_blank" style="color: #38bdf8;">点击查看报告</a><br>`);
+                        es.close();
+                        window.currentSSE = null;
+                        loader.classList.add('hidden');
+                        loadAnalysis(); 
+                        loadHistory();
+                    }
+                } catch(err) {
+                    console.error('解析消息失败:', err);
+                }
+            };
+    
+            es.onerror = (e) => {
+                out.insertAdjacentHTML('beforeend', `> ❌ 连接错误或中断<br>`);
+                es.close();
+                window.currentSSE = null;
+                loader.classList.add('hidden');
+            };
         }
 
         // ========== 以下所有函数均为原有功能，保持100%不变 ==========

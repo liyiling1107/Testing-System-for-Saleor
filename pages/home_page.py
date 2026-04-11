@@ -2,6 +2,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.remote.webelement import WebElement
+from typing import List, Optional
 from pages.base_page import BasePage
 import time
 import os
@@ -168,3 +170,85 @@ class HomePage(BasePage):
         finally:
             # 恢复原来的超时设置
             self.driver.set_page_load_timeout(30)
+
+    def get_product_names(self) -> List[str]:
+        """
+        获取首页所有商品的名称列表
+        
+        Returns:
+            商品名称列表
+        """
+        # 尝试多种常见的商品名称选择器
+        selectors = [
+            (By.CSS_SELECTOR, "[data-testid*='product'] h3"),
+            (By.CSS_SELECTOR, "[data-testid*='product'] .product-name"),
+            (By.CSS_SELECTOR, ".product-card h3"),
+            (By.CSS_SELECTOR, ".product-item h3"),
+            (By.CSS_SELECTOR, "[class*='product'] h3"),
+            (By.CSS_SELECTOR, "[class*='product'] [class*='title']"),
+            (By.CSS_SELECTOR, "h3"),  # 回退方案
+        ]
+        
+        for by, selector in selectors:
+            try:
+                elements = self.driver.find_elements(by, selector)
+                names = [e.text.strip() for e in elements if e.is_displayed() and e.text.strip()]
+                if names:
+                    return names
+            except:
+                continue
+        
+        return []
+    
+    def get_first_product_element(self) -> Optional[WebElement]:
+        """
+        获取首页第一个商品元素
+        
+        Returns:
+            商品元素或 None
+        """
+        selectors = [
+            (By.CSS_SELECTOR, "[data-testid*='product']"),
+            (By.CSS_SELECTOR, ".product-card"),
+            (By.CSS_SELECTOR, ".product-item"),
+            (By.CSS_SELECTOR, "[class*='product'] a"),
+            (By.CSS_SELECTOR, "a[href*='product']"),
+        ]
+        
+        for by, selector in selectors:
+            try:
+                elements = self.driver.find_elements(by, selector)
+                for elem in elements:
+                    if elem.is_displayed():
+                        return elem
+            except:
+                continue
+        
+        return None
+    
+    def find_search_input(self) -> Optional[WebElement]:
+        """
+        查找搜索输入框
+        
+        Returns:
+            搜索框元素或 None
+        """
+        selectors = [
+            (By.CSS_SELECTOR, "input[type='search']"),
+            (By.CSS_SELECTOR, "input[name='search']"),
+            (By.CSS_SELECTOR, "input[placeholder*='search' i]"),
+            (By.CSS_SELECTOR, "input[placeholder*='Search' i]"),
+            (By.CSS_SELECTOR, "[data-testid='search-input']"),
+            (By.CSS_SELECTOR, ".search-input"),
+            (By.CSS_SELECTOR, "input[aria-label*='search' i]"),
+        ]
+        
+        for by, selector in selectors:
+            try:
+                elem = self.driver.find_element(by, selector)
+                if elem.is_displayed():
+                    return elem
+            except:
+                continue
+        
+        return None

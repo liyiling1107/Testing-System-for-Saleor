@@ -1,7 +1,10 @@
 # backend.py
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
+import asyncio
 import subprocess, os, time, sys, psutil, json
 import smtplib
 from email.mime.text import MIMEText
@@ -36,6 +39,11 @@ SCRIPTS = {
     "orders": "api_tests/test_orders.py",
     "business": "api_tests/test_business_flow.py",
     "full": "api_tests/test_full_flow.py",
+
+    # UI测试
+    "ui_product_browsing": "ui_tests/test_product_browsing.py",
+    "ui_search": "ui_tests/test_search_functionality.py",
+    "ui_navigation": "ui_tests/test_navigation_flow.py",
 }
 
 def send_qq_email(script_id, error_output, report_url):
@@ -112,7 +120,7 @@ def get_stats():
 
 @app.get("/api/run/{script_id}")
 async def run_test(script_id: str):
-    """执行测试并根据结果触发告警 - 增加超时控制"""
+    """执行测试并根据结果触发告警 - 实时流式输出版本"""
     if script_id not in SCRIPTS:
         raise HTTPException(status_code=404, detail=f"脚本 {script_id} 不存在")
     
@@ -124,25 +132,25 @@ async def run_test(script_id: str):
     timestamp = int(time.time())
     temp_report = os.path.join(REPORT_DIR, f"temp_{timestamp}.html")
     
-    # 设置环境变量
+    # 设置环境变量 - 关键优化
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
-    env["PYTHONUNBUFFERED"] = "1"  # 禁用Python输出缓冲
-    
-    # 减少 webdriver-manager 的日志输出
+    env["PYTHONUNBUFFERED"] = "1"
     env["WDM_LOG_LEVEL"] = "0"
     env["WDM_PROGRESS_BAR"] = "0"
+    # 禁用 pytest 的颜色输出（避免 ANSI 转义码干扰）
+    env["PYTEST_ADDOPTS"] = "--color=no"
     
     # 构建 pytest 命令
     cmd = [
         sys.executable, "-m", "pytest",
-        "-s",  # 禁用捕获，实时输出
-        "-v",  # 详细输出
-        "--tb=short",  # 简短的追溯信息
+        "-s", "-v",
+        "--tb=short",
+        "--color=no",  # 禁用颜色
         SCRIPTS[script_id],
         f"--html={temp_report}",
         "--self-contained-html",
-        "--maxfail=1"  # 遇到第一个失败就停止
+        "--maxfail=1"
     ]
     
     print(f"[测试执行] 命令: {' '.join(cmd)}")
@@ -150,29 +158,51 @@ async def run_test(script_id: str):
     print(f"[测试执行] 开始执行...")
     
     try:
-        # 执行测试，设置整体超时时间为 120 秒
-        start_time = time.time()
-        res = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
-            encoding="utf-8", 
-            env=env, 
+        # 使用 Popen 实现实时输出
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            env=env,
             cwd=BASE_DIR,
-            timeout=120  # 2分钟整体超时
+            bufsize=1,  # 行缓冲
+            universal_newlines=True
         )
+        
+        output_lines = []
+        start_time = time.time()
+        
+        # 实时读取输出
+        print(f"[测试执行] 实时输出:")
+        print("-" * 60)
+        
+        for line in process.stdout:
+            line = line.rstrip()
+            if line:
+                output_lines.append(line)
+                print(f"  {line}")  # 后端控制台实时打印
+        
+        # 等待进程结束，设置超时
+        try:
+            returncode = process.wait(timeout=180)  # 3分钟超时
+        except subprocess.TimeoutExpired:
+            process.kill()
+            print(f"[测试执行] ❌ 测试执行超时（180秒）")
+            return {
+                "status": "failed",
+                "output": "测试执行超时（180秒），请检查网络连接或页面加载速度",
+                "report_url": ""
+            }
+        
         elapsed_time = time.time() - start_time
+        output_text = "\n".join(output_lines)
         
+        print("-" * 60)
         print(f"[测试执行] 执行完成，耗时: {elapsed_time:.2f} 秒")
-        print(f"[测试执行] 返回码: {res.returncode}")
+        print(f"[测试执行] 返回码: {returncode}")
         
-    except subprocess.TimeoutExpired:
-        print(f"[测试执行] ❌ 测试执行超时（120秒）")
-        return {
-            "status": "failed",
-            "output": "测试执行超时（120秒），请检查网络连接或页面加载速度",
-            "report_url": ""
-        }
     except Exception as e:
         print(f"[测试执行] ❌ 执行异常: {e}")
         return {
@@ -182,7 +212,7 @@ async def run_test(script_id: str):
         }
     
     # 确定测试状态
-    status = "Success" if res.returncode == 0 else "Failed"
+    status = "Success" if returncode == 0 else "Failed"
     final_name = f"Report_{status}_{script_id}_{timestamp}.html"
     final_path = os.path.join(REPORT_DIR, final_name)
     report_url = f"http://127.0.0.1:8000/reports/{final_name}"
@@ -196,35 +226,22 @@ async def run_test(script_id: str):
             print(f"[测试执行] ⚠️ 重命名报告失败: {e}")
     else:
         print(f"[测试执行] ⚠️ 警告: 临时报告文件不存在 {temp_report}")
-        # 创建简单的错误报告
         error_report_path = os.path.join(REPORT_DIR, f"Error_{script_id}_{timestamp}.html")
         with open(error_report_path, 'w', encoding='utf-8') as f:
-            f.write(f"<html><body><h1>测试执行失败</h1><p>脚本: {script_id}</p><pre>{res.stdout + res.stderr}</pre></body></html>")
+            f.write(f"<html><body><h1>测试执行失败</h1><p>脚本: {script_id}</p><pre>{output_text}</pre></body></html>")
         final_name = f"Error_{script_id}_{timestamp}.html"
         report_url = f"http://127.0.0.1:8000/reports/{final_name}"
-    
-    # 打印测试输出（前500字符和后500字符）
-    output_preview = res.stdout + res.stderr
-    print(f"\n[测试输出预览]")
-    print(f"{'='*60}")
-    if len(output_preview) > 1000:
-        print(output_preview[:500])
-        print("\n... (中间部分省略) ...\n")
-        print(output_preview[-500:])
-    else:
-        print(output_preview)
-    print(f"{'='*60}\n")
     
     # 失败时发送邮件
     if status == "Failed":
         print(f">>> [系统通知] 脚本 {script_id} 运行失败，准备发送告警邮件...")
-        send_qq_email(script_id, output_preview, report_url)
+        send_qq_email(script_id, output_text, report_url)
     else:
         print(f">>> [系统通知] 脚本 {script_id} 运行成功")
     
     return {
         "status": status.lower(),
-        "output": output_preview,
+        "output": output_text,
         "report_url": report_url
     }
 
@@ -369,6 +386,68 @@ def health_check():
         "screenshots_count": len([f for f in os.listdir(SCREENSHOT_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
     }
 
+@app.get("/api/run_stream/{script_id}")
+async def run_test_stream(script_id: str):
+    """流式执行测试，实时推送终端输出"""
+    if script_id not in SCRIPTS:
+        raise HTTPException(status_code=404, detail=f"脚本 {script_id} 不存在")
+    
+    timestamp = int(time.time())
+    temp_report = os.path.join(REPORT_DIR, f"temp_{timestamp}.html")
+    
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUNBUFFERED"] = "1"
+    env["PYTEST_ADDOPTS"] = "--color=no"
+    env["WDM_LOG_LEVEL"] = "0"
+    
+    cmd = [
+        sys.executable, "-u", "-m", "pytest",  # 添加 -u 强制无缓冲
+        "-s", "-v", "--tb=short", "--color=no",
+        SCRIPTS[script_id],
+        f"--html={temp_report}", "--self-contained-html", "--maxfail=1"
+    ]
+    
+    async def event_generator():
+        # 先发送一条测试消息
+        yield f"data: {json.dumps({'line': '>>> 测试启动中...'})}\n\n"
+        
+        process = subprocess.Popen(
+            cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT,
+            text=True, 
+            encoding="utf-8", 
+            env=env, 
+            cwd=BASE_DIR, 
+            bufsize=0  # 无缓冲
+        )
+        
+        output_lines = []
+        
+        # 使用 iter 读取每一行
+        for line in iter(process.stdout.readline, ''):
+            line = line.rstrip()
+            if line:
+                output_lines.append(line)
+                yield f"data: {json.dumps({'line': line})}\n\n"
+        
+        process.wait()
+        
+        status = "Success" if process.returncode == 0 else "Failed"
+        final_name = f"Report_{status}_{script_id}_{timestamp}.html"
+        report_url = f"http://127.0.0.1:8000/reports/{final_name}"
+        
+        if os.path.exists(temp_report):
+            os.rename(temp_report, os.path.join(REPORT_DIR, final_name))
+        
+        if status == "Failed":
+            send_qq_email(script_id, "\n".join(output_lines), report_url)
+        
+        yield f"data: {json.dumps({'done': True, 'status': status.lower(), 'report_url': report_url})}\n\n"
+    
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 if __name__ == "__main__":
     import uvicorn
     print(f"\n{'='*60}")
@@ -385,3 +464,4 @@ if __name__ == "__main__":
         log_level="info",
         access_log=True
     )
+
