@@ -1,101 +1,240 @@
+```markdown
 # SaleorQA_System 自动化测试系统
 
-本项目是一个针对 Saleor 电商平台的自动化测试与管理系统，集成了后台管理、API 调试、邮件监控及前端购物流程测试。
+## 项目简介
 
-## 1. 系统访问地址
+本项目是一个针对 **Saleor 电商平台** 的完整 QA 自动化测试管理系统，集成了 API 测试、UI 测试、性能测试、安全测试，并提供可视化的管理后台用于触发测试、查看报告和接收告警。
 
-在后台成功运行 Saleor 服务后，您可以通过以下链接访问各个模块：
-
-| 模块名称 | 访问地址 | 界面预览 |
-| :--- | :--- | :--- |
-| **管理员后台** | [http://localhost:9000/dashboard/](http://localhost:9000/dashboard/) | ![图片1](images/1.png) |
-| **GraphQL 交互界面** | [http://localhost:8000/graphql/](http://localhost:8000/graphql/) | ![图片2](images/2.png) |
-| **邮件测试工具** | [http://localhost:8025/](http://localhost:8025/) | ![图片3](images/3.png) |
-| **客户购物前端** | [http://localhost:3000/default-channel](http://localhost:3000/default-channel) | ![图片4](images/4.png) |
+**技术栈：** Python 3.12 + FastAPI + Pytest + Selenium + GraphQL
 
 ---
 
-## 2. 自动化测试脚本运行
+## 系统架构
 
-请确保您的开发环境为 **Python 3.12**。所有的测试脚本均需在 `SaleorQA_System` 根目录下通过命令行运行。
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      浏览器前端 (index.html)                  │
+│                    http://127.0.0.1:8000                    │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ REST API / SSE 流式
+┌─────────────────────────▼───────────────────────────────────┐
+│                 FastAPI 后端 (backend.py)                    │
+│        测试调度 · 实时日志 · 报告管理 · 邮件告警               │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ subprocess.Popen()
+┌─────────────────────────▼───────────────────────────────────┐
+│                    Pytest 测试执行层                          │
+│  ┌──────────┬──────────┬──────────┬──────────┬──────────┐  │
+│  │ API测试  │  UI测试  │ 功能测试  │ 性能测试  │ 安全测试  │  │
+│  └──────────┴──────────┴──────────┴──────────┴──────────┘  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                    Saleor 电商平台                            │
+│   GraphQL API :8000 │ Storefront :3000 │ Dashboard :9000   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### 运行指令：
-
-* **运行失败演示用例：**
-    ```bash
-    py -3.12 -m pytest -s function_tests/test_fail_demo.py
-    ```
-* **运行 Storefront 前端功能测试：**
-    ```bash
-    py -3.12 -m pytest -s function_tests/test_storefront.py
-    ```
-* **运行订单接口测试：**
-    ```bash
-    py -3.12 -m pytest -s api_tests/test_orders.py
-    ```
-* **运行全流程接口测试：**
-    ```bash
-    py -3.12 -m pytest -s api_tests/test_full_flow.py
-    ```
-* **运行业务流接口测试：**
-    ```bash
-    py -3.12 -m pytest -s api_tests/test_business_flow.py
-    ```
-
----
-
-## 3. SaleorQA 系统启动
-
-本项目包含一个可视化的 QA 管理系统，启动方式如下：
-
-1.  **启动后端服务：**
-    在终端执行以下命令：
-    ```bash
-    python app/backend.py
-    ```
-2.  **启动前端界面：**
-    后端启动后，直接在文件管理器中双击或在浏览器中打开以下文件：
-    `app/frontend/index.html`
+**三层设计：**
+1. **前端控制台** - 可视化触发测试、查看报告、系统监控
+2. **后端服务** - 测试调度、流式日志推送、报告管理、失败邮件告警
+3. **测试执行层** - Pytest 组织各类测试用例，生成 HTML 报告
 
 ---
 
-## 4. SaleorQA 系统操作手册
+## 目录结构（核心文件）
 
-请参考以下图解说明进行系统操作：
-
-| 步骤 | 操作指引图示 |
-| :---: | :--- |
-| **01** | ![图片5](images/5.png) |
-| **02** | ![图片6](images/6.png) |
-| **03** | ![图片7](images/7.png) |
-| **04** | ![图片8](images/8.png) |
-| **05** | ![图片9](images/9.png) |
-| **06** | ![图片10](images/10.png) |
-| **07** | ![图片11](images/11.png) |
-| **08** | ![图片12](images/12.png) |
-| **09** | ![图片13](images/13.png) |
-| **10** | ![图片14](images/14.png) |
-| **11** | ![图片15](images/15.png) |
-| **12** | ![图片16](images/16.png) |
-| **13** | ![图片17](images/17.png) |
-| **14** | ![图片18](images/18.png) |
-| **15** | ![图片19](images/19.png) |
-| **16** | ![图片20](images/20.png) |
-| **17** | ![图片21](images/21.png) |
-| **18** | ![图片22](images/22.png) |
-| **19** | ![图片23](images/23.png) |
-| **20** | ![图片24](images/24.png) |
-| **21** | ![图片25](images/25.png) |
-| **22** | ![图片26](images/26.png) |
-| **23** | ![图片27](images/27.png) |
+```
+Testing-System-for-Saleor-main/
+├── app/
+│   ├── backend.py              # FastAPI 后端服务入口
+│   └── frontend/index.html     # 可视化操作界面
+├── core_engine/
+│   └── saleor_api.py           # GraphQL API 客户端封装
+├── pages/
+│   ├── base_page.py            # Page Object 基类
+│   └── home_page.py            # 首页对象
+├── api_tests/                  # API 接口测试
+├── ui_tests/                   # UI 界面测试
+├── function_tests/             # 功能回归测试
+├── performance_tests/          # 性能与并发测试
+├── security_tests/             # 安全渗透测试
+├── conftest.py                 # Pytest 配置（fixture、截图、报告）
+├── config.json                 # 环境配置（URL、账号）
+├── check_products.py           # 商品查询与配置生成工具
+├── fix_env.py                  # 测试数据修复脚本
+├── requirements.txt            # Python 依赖
+└── reports/                    # 测试报告输出目录（自动创建）
+```
 
 ---
 
-## 5. 后续工作
+## 运行步骤
 
-1.  **写论文：**
-    先把目录部分写完，之后会找导师确认论文的大致框架，确认通过后往里面补充
-2.  **丰富测试种类&增加各类型测试的具体测试代码：**
-    各个部分的连接已打通，增加测试代码之后只需要在后端增加脚本映射表内容，前端增加对应的显示和调用
+### 1. 环境准备
+
+```bash
+# 确保 Python 3.12 已安装
+python --version
+
+# 安装依赖
+pip install -r requirements.txt
+```
+
+### 2. 配置文件
+
+编辑 `config.json`，填入你的 Saleor 环境信息：
+
+```json
+{
+  "baseUrl": "http://localhost:8000",
+  "frontend_url": "http://localhost:3000",
+  "dashboard_url": "http://localhost:9000",
+  "admin_user": {
+    "email": "admin@example.com",
+    "password": "admin123"
+  }
+}
+```
+
+### 3. 修改 ChromeDriver 路径
+
+编辑 `conftest.py` 第 51 行左右，将路径改为你的实际路径：
+
+```python
+driver = webdriver.Chrome(
+    service=Service(r"你的chromedriver.exe路径"),
+    options=options
+)
+```
+
+### 4. 启动 Saleor 服务
+
+确保 Saleor 的三个服务已运行：
+- GraphQL API: `http://localhost:8000`
+- Storefront: `http://localhost:3000`
+- Dashboard: `http://localhost:9000`
+
+### 5. 验证环境
+
+```bash
+# 检查商品数据是否可用
+python check_products.py
+# 选择 1 查看所有商品，确认有可用商品
+```
+
+### 6. 启动 QA 管理系统
+
+```bash
+# 启动后端服务
+python app/backend.py
+
+# 浏览器打开前端界面
+# 直接双击 app/frontend/index.html
+```
+
+【图1】QA管理系统主界面
+
+### 7. 运行测试
+
+**方式一：通过前端界面**
+- 点击对应测试卡片上的「运行」按钮
+- 实时查看终端输出
+- 测试完成后点击「报告」查看结果
+
+【图2】测试执行实时日志界面
+
+**方式二：命令行直接运行**
+```bash
+# API 测试
+py -3.12 -m pytest -s api_tests/test_orders.py
+
+# UI 测试
+py -3.12 -m pytest -s ui_tests/test_search_functionality.py
+
+# 功能测试
+py -3.12 -m pytest -s function_tests/test_login_functionality.py
+
+# 性能测试
+py -3.12 -m pytest -s performance_tests/test_api_response_time.py
+
+# 安全测试
+py -3.12 -m pytest -s security_tests/test_authentication_security.py
+```
 
 ---
+
+## 测试套件速查
+
+| 类别 | 脚本 ID | 测试内容 |
+|:---|:---|:---|
+| API | `orders` | 订单查询、分页、权限 |
+| API | `business` | 商品 CRUD、查询性能 |
+| API | `full` | 完整生命周期、稳定性 |
+| UI | `ui_search` | 搜索框、关键词搜索 |
+| UI | `ui_navigation` | 页面导航、后退 |
+| UI | `ui_product_browsing` | 商品浏览、一致性 |
+| 功能 | `func_login` | 登录表单、无效凭据 |
+| 功能 | `func_cart` | 购物车增删改 |
+| 功能 | `func_checkout` | 结账流程 |
+| 性能 | `perf_api_response` | API 响应时间 |
+| 性能 | `perf_concurrent` | 并发请求 |
+| 性能 | `perf_page_load` | 页面加载性能 |
+| 安全 | `sec_auth` | 认证安全、SQL注入 |
+| 安全 | `sec_api` | API安全、CORS、XSS |
+
+---
+
+## 常用辅助命令
+
+```bash
+# 检查商品数据并生成配置
+python check_products.py
+# 选项 4：自动生成 test_data.yaml
+
+# 修复被测试改乱的商品名
+python fix_env.py
+
+# 生成带时间戳的 HTML 报告
+py -3.12 -m pytest --html=reports/report.html --self-contained-html
+```
+
+【图3】测试报告示例
+
+---
+
+## 故障排查
+
+| 问题 | 解决方案 |
+|:---|:---|
+| Token 获取失败 | 检查 `config.json` 中的 `admin_user` 账号密码 |
+| ChromeDriver 报错 | 修改 `conftest.py` 中的驱动路径 |
+| 测试跳过（无商品） | 运行 `python check_products.py` 确认数据库有商品 |
+| 前端无法连接后端 | 确保 `backend.py` 运行在 `127.0.0.1:8000` |
+| 邮件发送失败 | 更新 `backend.py` 中的 QQ 邮箱授权码 |
+
+---
+
+## 扩展开发
+
+**添加新测试用例：**
+1. 在对应目录创建测试文件
+2. 在 `backend.py` 的 `SCRIPTS` 字典中添加映射
+3. 在前端 `index.html` 中添加对应的按钮卡片
+
+**添加新 API 方法：**
+在 `core_engine/saleor_api.py` 中参照现有方法添加 GraphQL 查询封装。
+
+---
+
+## 依赖清单（核心）
+
+```
+pytest==9.0.2
+fastapi==0.135.3
+selenium==4.41.0
+requests==2.33.1
+pytest-html==4.2.0
+PyYAML==6.0.3
+uvicorn==0.43.0
+```
