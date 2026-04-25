@@ -1,3 +1,4 @@
+<meta name="google-site-verification" content="IS8WcQxMMB0z9gOQwWCqmTaytpHIZlBLbbIIQjol7RE" />
 # SaleorQA_System 自动化测试系统
 
 ## 项目简介
